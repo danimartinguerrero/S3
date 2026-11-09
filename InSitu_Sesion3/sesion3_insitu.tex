@@ -1,0 +1,160 @@
+% Informe in situ - Sesión 3: Oscilador sinusoidal en puente de Wien
+% Instrumentación Electrónica - Grado en Física - Universidad de Salamanca
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{mathpazo}
+\usepackage{microtype}
+\usepackage[a4paper,top=1.2cm,bottom=1.2cm,left=2cm,right=2cm]{geometry}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{etoolbox}
+\usepackage{siunitx}
+\usepackage[siunitx,europeanresistors,americaninductors]{circuitikz}
+\usepackage{titlesec}
+\usepackage{enumitem}
+
+\sisetup{output-decimal-marker={,}, group-minimum-digits=4}
+
+\definecolor{azul}{HTML}{1F3A5F}
+\definecolor{gris}{gray}{0.45}
+\definecolor{fondo}{HTML}{EEF2F7}
+
+\titleformat{\section}{\large\bfseries\color{azul}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{0.7em}{0.25em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.35em}
+\pagestyle{plain}
+
+% ---------------------------------------------------------------------
+% Datos medidos. Dejar vacíos para rellenar a mano en el laboratorio;
+% si se escribe un valor, se imprime en lugar del hueco.
+% ---------------------------------------------------------------------
+\newcommand{\Rmuno}{}   % R1 medida (kΩ)
+\newcommand{\Rmdos}{}   % R2 medida (kΩ)
+\newcommand{\Rmtres}{}  % R3 medida (kΩ)
+\newcommand{\Rmcuatro}{}% R4 medida (kΩ)
+\newcommand{\Cmuno}{}   % C1 medido (nF)
+\newcommand{\Cmdos}{}   % C2 medido (nF)
+\newcommand{\Rpot}{}    % R4 (potenciómetro) tras el ajuste (kΩ)
+
+% Hueco para rellenar: \hueco[ancho]{valor}
+\newcommand{\hueco}[2][1.8cm]{%
+  \expandafter\ifblank\expandafter{#2}{\rule[-0.25ex]{#1}{0.4pt}}{\makebox[#1]{#2}}}
+% Líneas en blanco para respuestas: \lineas{n}
+\newcommand{\lineas}[1]{%
+  \par\vspace{-0.4em}%
+  \foreach \i in {1,...,#1}{\vspace{1.05em}\noindent\rule{\linewidth}{0.3pt}\par}}
+
+\begin{document}
+
+% ------------------------- Cabecera ----------------------------------
+{\large\bfseries\color{azul} Sesión 3: Oscilador sinusoidal en puente de Wien}\hfill
+{\small\color{gris} Instrumentación Electrónica $\cdot$ Grado en Física}\\[0.2em]
+{\small Miguel Martín Cortés (70974284X) $\cdot$ Álvaro Montero Mateos (71096223A) $\cdot$
+Daniel Martín Guerrero (71063727Y)}\\[0.1em]
+{\small Grupo C.2 \hfill Fecha: \hueco[2.2cm]{} de noviembre de 2026}\\[-0.5em]
+{\color{azul}\rule{\linewidth}{0.5pt}}
+
+% ------------------------- Introducción ------------------------------
+\section{Introducción}
+
+\noindent
+\begin{minipage}[c]{0.58\textwidth}
+Se monta un oscilador sinusoidal en puente de Wien con el amplificador
+operacional \textmu A741 (figura~1). La red $RC$ de realimentación positiva
+selecciona la frecuencia de oscilación, y la red $R_3$--$R_4$ de
+realimentación negativa fija la ganancia $K = 1 + R_4/R_3$. Con
+$R_1 = R_2 = R$ y $C_1 = C_2 = C$, las condiciones de oscilación son
+\[
+  R_4 = 2R_3 \;\;(K = 3), \qquad f_0 = \frac{1}{2\pi RC}.
+\]
+Se comprueba la forma de onda de salida, se ajusta $R_4$ con un
+potenciómetro hasta obtener una sinusoide limpia y se mide $f_0$ para
+varios pares de condensadores.
+\end{minipage}\hfill
+\begin{minipage}[c]{0.38\textwidth}
+\centering
+\begin{circuitikz}[scale=0.58, transform shape, font=\large]
+  \draw (0,0) node[op amp, noinv input up] (oa) {};
+  \draw (oa.out) -- ++(0.8,0) coordinate (vo) node[right] {$v_o$};
+  % Realimentación positiva: R1--C1 en serie, R2 || C2 a masa
+  \draw (oa.+) -- ++(-3.0,0) coordinate (vp);
+  \draw (vp) -- (vp |- 0,2.2) coordinate (t1)
+        to[C, l=$C_1$] ($(t1)!0.5!(vo |- 0,2.2)$)
+        to[R, l=$R_1$] (vo |- 0,2.2) -- (vo);
+  \draw (vp) to[short, *-] ++(0,-2.4) coordinate (a);
+  \draw (a) -- ++(-0.8,0) to[R, l_=$R_2$] ++(0,-2.0) -- ++(0.8,0) coordinate (b);
+  \draw (a) -- ++(0.8,0) to[C, l=$C_2$] ++(0,-2.0) -- ++(-0.8,0);
+  \draw (b) node[ground] {};
+  % Realimentación negativa: R4 a la salida, R3 a masa
+  \draw (oa.-) -- ++(-0.4,0) coordinate (m) -- (m |- 0,-2.0) coordinate (vm);
+  \draw (vm) to[R, l_=$R_4$, *-] (vo |- vm) -- (vo);
+  \draw (vo) node[circ] {};
+  \draw (vm) to[R, l=$R_3$] ++(0,-2.4) node[ground] {};
+\end{circuitikz}\\[0.2em]
+{\small\color{gris} Figura 1. Oscilador en puente de Wien\\(sin la polarización $\pm V_{CC}$).}
+\end{minipage}
+
+% ------------------------- Componentes -------------------------------
+\section{Valores de los componentes}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{l*{6}{>{\centering\arraybackslash}p{1.45cm}}}
+  \toprule
+  & $R_1$ [\si{\kilo\ohm}] & $R_2$ [\si{\kilo\ohm}] & $R_3$ [\si{\kilo\ohm}]
+  & $R_4$ [\si{\kilo\ohm}] & $C_1$ [\si{\nano\farad}] & $C_2$ [\si{\nano\farad}] \\
+  \midrule
+  Nominal & 10 & 10 & 10 & 20 & 10 & 10 \\
+  Medido (multímetro) & \hueco[1.2cm]{\Rmuno} & \hueco[1.2cm]{\Rmdos} & \hueco[1.2cm]{\Rmtres}
+          & \hueco[1.2cm]{\Rmcuatro} & \hueco[1.2cm]{\Cmuno} & \hueco[1.2cm]{\Cmdos} \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+% ------------------------- Forma de onda -----------------------------
+\section{Forma de onda a la salida}
+
+\textbf{¿Qué onda se mide en la salida con el osciloscopio?}
+\lineas{2}
+
+\vspace{0em}
+\textbf{Ajuste con potenciómetro.} Sustituida $R_4$ por un potenciómetro
+(ajustado inicialmente a $\approx\SI{20}{\kilo\ohm}$) y retocado hasta que la
+salida se parece lo más posible a una sinusoide:
+\[
+  R_4 = \hueco[2.2cm]{\Rpot}\ \si{\kilo\ohm},
+  \qquad
+  R_4/R_3 = \hueco[2.2cm]{}.
+\]
+
+% ------------------------- Frecuencia --------------------------------
+\section{Frecuencia de oscilación}
+
+Con el potenciómetro reajustado para mantener la salida sinusoidal, se
+sustituye el par de condensadores y se miden automáticamente con el
+osciloscopio el periodo $T_0$ y la frecuencia $f_0$.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{*{6}{>{\centering\arraybackslash}p{2.05cm}}}
+  \toprule
+  $C$ [\si{\pico\farad}] & $R$ [\si{\kilo\ohm}] & $f_0$ [\si{\kilo\hertz}] calculada
+  & $T_0$ [\si{\milli\second}] medido & $f_0$ [\si{\kilo\hertz}] medida
+  & Desviación [\%] \\
+  \midrule
+  & 10 & & & & \\
+  & 10 & & & & \\
+  & 10 & & & & \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{¿Se ajusta $f_0$ al valor obtenido con la ecuación $f_0 = 1/(2\pi RC)$?}
+\lineas{3}
+
+\end{document}
